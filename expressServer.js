@@ -1,54 +1,60 @@
-const express=require("express");
-const bodyParser = require("body-parser");
+const express = require("express");
 
+const app = express();
+app.use(express.json());
 
-const app=express();
-
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
-
-let arrayOfTasks=[
-    { id: "1", task: "buy grocery", isComplete: false},
-    { id: "2", task: "learn kubernetes", isComplete: false}
+let arrayOfTasks = [
+    { id: "1", task: "buy grocery", isComplete: false },
+    { id: "2", task: "learn kubernetes", isComplete: false }
 ];
+let idCount=2;
 app.route("/tasks")
-    .get((req, res)=>{
+    .get((req, res) => {
         res.send(arrayOfTasks);
     })
-    .post((req, res)=>{
-        arrayOfTasks.push(req.body);
-        res.send(req.body);
+    .post((req, res) => {
+        idCount+=1;
+        const newTask={
+            ...req.body,
+            id: idCount,
+            isComplete: false
+        };
+        arrayOfTasks.push(newTask);
+
+        res.status(201).send(newTask);
+    // add status as 201
     });
 
 app.route("/task/:id")
-    .put((req, res)=>{
-        let id=req.params.id;
-        for(let i=0;i<arrayOfTasks.length;i+=1){
-            if(arrayOfTasks[i].id==id){
-                arrayOfTasks[i].task=req.body.task;
-                arrayOfTasks[i].isComplete=req.body.isComplete;
+    .put((req, res) => {
+        const { id } = req.params;
+        for (let i = 0; i < arrayOfTasks.length; i += 1) {
+            if (arrayOfTasks[i].id === id) {
+                arrayOfTasks[i].task = req.body.task;
+                arrayOfTasks[i].isComplete = req.body.isComplete;
                 res.send(req.body);
+                //use js functions to implement
             }
         }
     })
-    .patch((req, res)=>{
-        let id=req.params.id;
-        for(let i=0;i<arrayOfTasks.length;i+=1){
-            if(arrayOfTasks[i].id==id){
-                arrayOfTasks[i].isComplete=req.body.isComplete;
+    .patch((req, res) => {
+        let id = req.params.id;
+        for (let i = 0; i < arrayOfTasks.length; i += 1) {
+            if (arrayOfTasks[i].id === id) {
+                arrayOfTasks[i].isComplete = req.body.isComplete;
                 res.send(arrayOfTasks[i]);
             }
         }
     })
-    .delete((req, res)=>{
-        let id=req.params.id;
-        for(let i=0;i<arrayOfTasks.length;i+=1){
-            if(arrayOfTasks[i].id==id){
-                let x=arrayOfTasks.splice(i, 1);
-                res.send(x);
+    .delete((req, res) => {
+        let id = req.params.id;
+        for (let i = 0; i < arrayOfTasks.length; i += 1) {
+            if (arrayOfTasks[i].id === id) {
+                const deletedTask = arrayOfTasks.splice(i, 1);
+                res.send(deletedTask);
             }
         }
     });
-app.listen(8000, ()=>{
+app.listen(8000, () => {
     console.log("express server running on ports 8000");
 });
